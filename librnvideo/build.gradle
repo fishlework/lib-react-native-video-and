@@ -1,0 +1,63 @@
+apply plugin: 'com.android.library'
+
+def version_name="2.1.1"
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.0"
+
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    //noinspection GradleDynamicVersion
+    provided 'com.facebook.react:react-native:+'
+    compile 'com.yqritc:android-scalablevideoview:1.0.4'
+    compileOnly 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
+}
+
+task cleanJar(){
+    delete file('react_native_video_'+version_name+'.jar')
+}
+
+def packageJar(String target,String classDir){
+    exec{
+        executable "jar"
+        args "cvfM", target
+        args "-C",classDir
+        args "","."
+    }
+}
+
+task buildJar(dependsOn:[build]){
+    packageJar('react_native_video_'+version_name+'.jar',"build/intermediates/javac/release/compileReleaseJavaWithJavac/classes")
+}
+
+task publishJar(type:Copy,dependsOn: [buildJar]){
+    from 'react_native_video_'+version_name+'.jar'
+    into 'libs/'
+}
+
